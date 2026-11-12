@@ -19,9 +19,13 @@
                 <c:forEach var="item" items="${sessionScope.cart}">
                     <div class="cart-item-row">
                         <div class="cart-item-info">
-                            <img src="${item.product.image}" class="cart-item-img" alt="${item.product.name}" onerror="this.src='https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=500&auto=format&fit=crop&q=60'">
+                            <a href="${pageContext.request.contextPath}/product-detail?id=${item.product.id}" title="Xem chi tiết ${item.product.name}">
+                                <img src="${item.product.image}" class="cart-item-img" alt="${item.product.name}" onerror="this.src='https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=500&auto=format&fit=crop&q=60'">
+                            </a>
                             <div class="cart-item-details">
-                                <h4>${item.product.name}</h4>
+                                <a href="${pageContext.request.contextPath}/product-detail?id=${item.product.id}" style="text-decoration: none; color: inherit;" title="Xem chi tiết ${item.product.name}">
+                                    <h4>${item.product.name}</h4>
+                                </a>
                                 <p>Đơn giá: <fmt:formatNumber value="${item.product.price}" pattern="#,###" />đ</p>
                             </div>
                         </div>

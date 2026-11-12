@@ -10,6 +10,10 @@ public class Product {
     private String description;
     private boolean status;
     private String categoryName; // helper field to show Category Name without extra queries
+    private String detailDescription;
+    private String ingredients;
+    private String instruction;
+    private String servingSize;
 
     public Product() {
     }
@@ -23,6 +27,21 @@ public class Product {
         this.image = image;
         this.description = description;
         this.status = status;
+    }
+
+    public Product(int id, String name, int categoryId, double price, int quantity, String image, String description, boolean status, String detailDescription, String ingredients, String instruction, String servingSize) {
+        this.id = id;
+        this.name = name;
+        this.categoryId = categoryId;
+        this.price = price;
+        this.quantity = quantity;
+        this.image = image;
+        this.description = description;
+        this.status = status;
+        this.detailDescription = detailDescription;
+        this.ingredients = ingredients;
+        this.instruction = instruction;
+        this.servingSize = servingSize;
     }
 
     public int getId() {
@@ -95,5 +114,40 @@ public class Product {
 
     public void setCategoryName(String categoryName) {
         this.categoryName = categoryName;
+    }
+
+    public String getDetailDescription() {
+        if (detailDescription == null || detailDescription.trim().isEmpty()) {
+            return description;
+        }
+        return detailDescription;
+    }
+
+    public void setDetailDescription(String detailDescription) {
+        this.detailDescription = detailDescription;
+    }
+
+    public String getIngredients() {
+        return ingredients;
+    }
+
+    public void setIngredients(String ingredients) {
+        this.ingredients = ingredients;
+    }
+
+    public String getInstruction() {
+        return instruction;
+    }
+
+    public void setInstruction(String instruction) {
+        this.instruction = instruction;
+    }
+
+    public String getServingSize() {
+        return servingSize;
+    }
+
+    public void setServingSize(String servingSize) {
+        this.servingSize = servingSize;
     }
 }

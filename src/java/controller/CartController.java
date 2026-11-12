@@ -37,6 +37,16 @@ public class CartController extends HttpServlet {
         
         if ("add".equalsIgnoreCase(action)) {
             String pidStr = request.getParameter("pid");
+            String qtyParam = request.getParameter("qty");
+            int addQty = 1;
+            if (qtyParam != null && !qtyParam.trim().isEmpty()) {
+                try {
+                    addQty = Math.max(1, Integer.parseInt(qtyParam.trim()));
+                } catch (NumberFormatException e) {
+                    addQty = 1;
+                }
+            }
+            
             boolean added = false;
             String errorMessage = "";
             
@@ -51,8 +61,13 @@ public class CartController extends HttpServlet {
                         for (CartItem item : cart) {
                             if (item.getProduct().getId() == pid) {
                                 if (item.getQuantity() < prod.getQuantity()) {
-                                    item.setQuantity(item.getQuantity() + 1);
-                                    added = true;
+                                    int newQty = Math.min(item.getQuantity() + addQty, prod.getQuantity());
+                                    if (newQty > item.getQuantity()) {
+                                        item.setQuantity(newQty);
+                                        added = true;
+                                    } else {
+                                        errorMessage = "Số lượng sản phẩm trong giỏ hàng đã đạt giới hạn tồn kho!";
+                                    }
                                 } else {
                                     errorMessage = "Số lượng sản phẩm trong giỏ hàng đã đạt giới hạn tồn kho!";
                                 }
@@ -61,7 +76,8 @@ public class CartController extends HttpServlet {
                             }
                         }
                         if (!found) {
-                            cart.add(new CartItem(prod, 1));
+                            int initialQty = Math.min(addQty, prod.getQuantity());
+                            cart.add(new CartItem(prod, initialQty));
                             added = true;
                         }
                     } else {

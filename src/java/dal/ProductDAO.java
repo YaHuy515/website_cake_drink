@@ -11,26 +11,37 @@ import model.Product;
 
 public class ProductDAO extends DBContext {
 
+    private Product mapResultSetToProduct(ResultSet rs) throws SQLException {
+        Product p = new Product(
+                rs.getInt("id"),
+                rs.getString("name"),
+                rs.getInt("category_id"),
+                rs.getDouble("price"),
+                rs.getInt("quantity"),
+                rs.getString("image"),
+                rs.getString("description"),
+                rs.getBoolean("status"),
+                rs.getString("detail_description"),
+                rs.getString("ingredients"),
+                rs.getString("instruction"),
+                rs.getString("serving_size")
+        );
+        try {
+            p.setCategoryName(rs.getString("category_name"));
+        } catch (SQLException ignored) {}
+        return p;
+    }
+
     public List<Product> getAllActive() {
         List<Product> list = new ArrayList<>();
-        String sql = "SELECT p.id, p.name, p.category_id, p.price, p.quantity, p.image, p.description, p.status, c.name AS category_name "
+        String sql = "SELECT p.id, p.name, p.category_id, p.price, p.quantity, p.image, p.description, p.status, "
+                   + "p.detail_description, p.ingredients, p.instruction, p.serving_size, c.name AS category_name "
                    + "FROM Products p JOIN Categories c ON p.category_id = c.id "
                    + "WHERE p.status = 1";
         try (PreparedStatement st = connection.prepareStatement(sql);
              ResultSet rs = st.executeQuery()) {
             while (rs.next()) {
-                Product p = new Product(
-                        rs.getInt("id"),
-                        rs.getString("name"),
-                        rs.getInt("category_id"),
-                        rs.getDouble("price"),
-                        rs.getInt("quantity"),
-                        rs.getString("image"),
-                        rs.getString("description"),
-                        rs.getBoolean("status")
-                );
-                p.setCategoryName(rs.getString("category_name"));
-                list.add(p);
+                list.add(mapResultSetToProduct(rs));
             }
         } catch (SQLException ex) {
             Logger.getLogger(ProductDAO.class.getName()).log(Level.SEVERE, null, ex);
@@ -40,24 +51,14 @@ public class ProductDAO extends DBContext {
 
     public List<Product> getAllAdmin() {
         List<Product> list = new ArrayList<>();
-        String sql = "SELECT p.id, p.name, p.category_id, p.price, p.quantity, p.image, p.description, p.status, c.name AS category_name "
+        String sql = "SELECT p.id, p.name, p.category_id, p.price, p.quantity, p.image, p.description, p.status, "
+                   + "p.detail_description, p.ingredients, p.instruction, p.serving_size, c.name AS category_name "
                    + "FROM Products p JOIN Categories c ON p.category_id = c.id "
                    + "ORDER BY p.id DESC";
         try (PreparedStatement st = connection.prepareStatement(sql);
              ResultSet rs = st.executeQuery()) {
             while (rs.next()) {
-                Product p = new Product(
-                        rs.getInt("id"),
-                        rs.getString("name"),
-                        rs.getInt("category_id"),
-                        rs.getDouble("price"),
-                        rs.getInt("quantity"),
-                        rs.getString("image"),
-                        rs.getString("description"),
-                        rs.getBoolean("status")
-                );
-                p.setCategoryName(rs.getString("category_name"));
-                list.add(p);
+                list.add(mapResultSetToProduct(rs));
             }
         } catch (SQLException ex) {
             Logger.getLogger(ProductDAO.class.getName()).log(Level.SEVERE, null, ex);
@@ -66,25 +67,15 @@ public class ProductDAO extends DBContext {
     }
 
     public Product getById(int id) {
-        String sql = "SELECT p.id, p.name, p.category_id, p.price, p.quantity, p.image, p.description, p.status, c.name AS category_name "
+        String sql = "SELECT p.id, p.name, p.category_id, p.price, p.quantity, p.image, p.description, p.status, "
+                   + "p.detail_description, p.ingredients, p.instruction, p.serving_size, c.name AS category_name "
                    + "FROM Products p JOIN Categories c ON p.category_id = c.id "
                    + "WHERE p.id = ?";
         try (PreparedStatement st = connection.prepareStatement(sql)) {
             st.setInt(1, id);
             try (ResultSet rs = st.executeQuery()) {
                 if (rs.next()) {
-                    Product p = new Product(
-                            rs.getInt("id"),
-                            rs.getString("name"),
-                            rs.getInt("category_id"),
-                            rs.getDouble("price"),
-                            rs.getInt("quantity"),
-                            rs.getString("image"),
-                            rs.getString("description"),
-                            rs.getBoolean("status")
-                    );
-                    p.setCategoryName(rs.getString("category_name"));
-                    return p;
+                    return mapResultSetToProduct(rs);
                 }
             }
         } catch (SQLException ex) {
@@ -93,10 +84,33 @@ public class ProductDAO extends DBContext {
         return null;
     }
 
+    public List<Product> getRelatedProducts(int categoryId, int currentProductId, int limit) {
+        List<Product> list = new ArrayList<>();
+        String sql = "SELECT TOP (?) p.id, p.name, p.category_id, p.price, p.quantity, p.image, p.description, "
+                   + "p.status, p.detail_description, p.ingredients, p.instruction, p.serving_size, c.name AS category_name "
+                   + "FROM Products p JOIN Categories c ON p.category_id = c.id "
+                   + "WHERE p.status = 1 AND p.category_id = ? AND p.id <> ? "
+                   + "ORDER BY p.id DESC";
+        try (PreparedStatement st = connection.prepareStatement(sql)) {
+            st.setInt(1, limit);
+            st.setInt(2, categoryId);
+            st.setInt(3, currentProductId);
+            try (ResultSet rs = st.executeQuery()) {
+                while (rs.next()) {
+                    list.add(mapResultSetToProduct(rs));
+                }
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(ProductDAO.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return list;
+    }
+
     public List<Product> searchAndFilter(String query, int categoryId, String sortOrder) {
         List<Product> list = new ArrayList<>();
         StringBuilder sql = new StringBuilder(
-                "SELECT p.id, p.name, p.category_id, p.price, p.quantity, p.image, p.description, p.status, c.name AS category_name " +
+                "SELECT p.id, p.name, p.category_id, p.price, p.quantity, p.image, p.description, p.status, " +
+                "p.detail_description, p.ingredients, p.instruction, p.serving_size, c.name AS category_name " +
                 "FROM Products p JOIN Categories c ON p.category_id = c.id " +
                 "WHERE p.status = 1"
         );
@@ -127,18 +141,7 @@ public class ProductDAO extends DBContext {
             }
             try (ResultSet rs = st.executeQuery()) {
                 while (rs.next()) {
-                    Product p = new Product(
-                            rs.getInt("id"),
-                            rs.getString("name"),
-                            rs.getInt("category_id"),
-                            rs.getDouble("price"),
-                            rs.getInt("quantity"),
-                            rs.getString("image"),
-                            rs.getString("description"),
-                            rs.getBoolean("status")
-                    );
-                    p.setCategoryName(rs.getString("category_name"));
-                    list.add(p);
+                    list.add(mapResultSetToProduct(rs));
                 }
             }
         } catch (SQLException ex) {
@@ -148,7 +151,7 @@ public class ProductDAO extends DBContext {
     }
 
     public boolean insert(Product p) {
-        String sql = "INSERT INTO Products (name, category_id, price, quantity, image, description, status) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO Products (name, category_id, price, quantity, image, description, status, detail_description, ingredients, instruction, serving_size) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (PreparedStatement st = connection.prepareStatement(sql)) {
             st.setString(1, p.getName());
             st.setInt(2, p.getCategoryId());
@@ -157,6 +160,10 @@ public class ProductDAO extends DBContext {
             st.setString(5, p.getImage());
             st.setString(6, p.getDescription());
             st.setBoolean(7, p.isStatus());
+            st.setString(8, p.getDetailDescription());
+            st.setString(9, p.getIngredients());
+            st.setString(10, p.getInstruction());
+            st.setString(11, p.getServingSize());
             return st.executeUpdate() > 0;
         } catch (SQLException ex) {
             Logger.getLogger(ProductDAO.class.getName()).log(Level.SEVERE, null, ex);
@@ -165,7 +172,7 @@ public class ProductDAO extends DBContext {
     }
 
     public boolean update(Product p) {
-        String sql = "UPDATE Products SET name = ?, category_id = ?, price = ?, quantity = ?, image = ?, description = ?, status = ? WHERE id = ?";
+        String sql = "UPDATE Products SET name = ?, category_id = ?, price = ?, quantity = ?, image = ?, description = ?, status = ?, detail_description = ?, ingredients = ?, instruction = ?, serving_size = ? WHERE id = ?";
         try (PreparedStatement st = connection.prepareStatement(sql)) {
             st.setString(1, p.getName());
             st.setInt(2, p.getCategoryId());
@@ -174,7 +181,11 @@ public class ProductDAO extends DBContext {
             st.setString(5, p.getImage());
             st.setString(6, p.getDescription());
             st.setBoolean(7, p.isStatus());
-            st.setInt(8, p.getId());
+            st.setString(8, p.getDetailDescription());
+            st.setString(9, p.getIngredients());
+            st.setString(10, p.getInstruction());
+            st.setString(11, p.getServingSize());
+            st.setInt(12, p.getId());
             return st.executeUpdate() > 0;
         } catch (SQLException ex) {
             Logger.getLogger(ProductDAO.class.getName()).log(Level.SEVERE, null, ex);

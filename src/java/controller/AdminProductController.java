@@ -85,6 +85,10 @@ public class AdminProductController extends HttpServlet {
         String qtyStr = request.getParameter("quantity");
         String image = request.getParameter("image");
         String description = request.getParameter("description");
+        String detailDescription = request.getParameter("detailDescription");
+        String ingredients = request.getParameter("ingredients");
+        String instruction = request.getParameter("instruction");
+        String servingSize = request.getParameter("servingSize");
         String statusStr = request.getParameter("status"); // checkbox: "on" or null
         
         // Validation
@@ -121,7 +125,14 @@ public class AdminProductController extends HttpServlet {
         boolean status = "on".equals(statusStr) || "true".equals(statusStr);
         
         if ("add".equalsIgnoreCase(formAction)) {
-            Product p = new Product(0, name.trim(), categoryId, price, qty, image != null ? image.trim() : "", description != null ? description.trim() : "", status);
+            Product p = new Product(0, name.trim(), categoryId, price, qty, 
+                    image != null ? image.trim() : "", 
+                    description != null ? description.trim() : "", 
+                    status,
+                    detailDescription != null ? detailDescription.trim() : "",
+                    ingredients != null ? ingredients.trim() : "",
+                    instruction != null ? instruction.trim() : "",
+                    servingSize != null ? servingSize.trim() : "");
             boolean success = prodDao.insert(p);
             if (success) {
                 request.getSession().setAttribute("message", "Thêm sản phẩm thành công!");
@@ -133,7 +144,14 @@ public class AdminProductController extends HttpServlet {
         } else if ("edit".equalsIgnoreCase(formAction)) {
             try {
                 int id = Integer.parseInt(idStr);
-                Product p = new Product(id, name.trim(), categoryId, price, qty, image != null ? image.trim() : "", description != null ? description.trim() : "", status);
+                Product p = new Product(id, name.trim(), categoryId, price, qty, 
+                        image != null ? image.trim() : "", 
+                        description != null ? description.trim() : "", 
+                        status,
+                        detailDescription != null ? detailDescription.trim() : "",
+                        ingredients != null ? ingredients.trim() : "",
+                        instruction != null ? instruction.trim() : "",
+                        servingSize != null ? servingSize.trim() : "");
                 boolean success = prodDao.update(p);
                 if (success) {
                     request.getSession().setAttribute("message", "Cập nhật sản phẩm thành công!");
@@ -173,6 +191,10 @@ public class AdminProductController extends HttpServlet {
         } catch (Exception e) {}
         p.setImage(request.getParameter("image"));
         p.setDescription(request.getParameter("description"));
+        p.setDetailDescription(request.getParameter("detailDescription"));
+        p.setIngredients(request.getParameter("ingredients"));
+        p.setInstruction(request.getParameter("instruction"));
+        p.setServingSize(request.getParameter("servingSize"));
         p.setStatus("on".equals(request.getParameter("status")));
         
         request.setAttribute("product", p);

@@ -50,10 +50,38 @@ public class LoginController extends HttpServlet {
         if (acc != null) {
             HttpSession session = request.getSession();
             
+            // Tách biệt giỏ hàng theo tài khoản:
+            Account prevAcc = (Account) session.getAttribute("account");
+            if (prevAcc == null) {
+                prevAcc = (Account) session.getAttribute("admin");
+            }
+            
+            java.util.List<model.CartItem> currentCart = (java.util.List<model.CartItem>) session.getAttribute("cart");
+            if (prevAcc != null && !prevAcc.getUsername().equalsIgnoreCase(acc.getUsername())) {
+                // Nếu đổi sang tài khoản khác, lưu giỏ hàng của tài khoản cũ
+                if (currentCart != null && !currentCart.isEmpty()) {
+                    session.setAttribute("cart_" + prevAcc.getUsername(), new java.util.ArrayList<>(currentCart));
+                }
+                session.removeAttribute("cart");
+                session.removeAttribute("appliedVoucherCode");
+                session.removeAttribute("discountAmount");
+                currentCart = null;
+            }
+            
+            // Khôi phục giỏ hàng của tài khoản vừa đăng nhập (nếu có)
+            java.util.List<model.CartItem> userSavedCart = (java.util.List<model.CartItem>) session.getAttribute("cart_" + acc.getUsername());
+            if (userSavedCart != null) {
+                session.setAttribute("cart", new java.util.ArrayList<>(userSavedCart));
+            } else if (currentCart != null && !currentCart.isEmpty()) {
+                // Khách vãng lai vừa chọn món rồi đăng nhập -> gán giỏ hàng cho tài khoản này
+                session.setAttribute("cart_" + acc.getUsername(), new java.util.ArrayList<>(currentCart));
+            } else {
+                session.setAttribute("cart", new java.util.ArrayList<model.CartItem>());
+            }
+            
             if ("admin".equals(acc.getRole())) {
                 // Store in admin session variable
                 session.setAttribute("admin", acc);
-                // If no customer account in session yet, optionally assign for store browsing
                 if (session.getAttribute("account") == null) {
                     session.setAttribute("account", acc);
                 }
@@ -63,7 +91,6 @@ public class LoginController extends HttpServlet {
                 // Store in customer session variables (account & customer)
                 session.setAttribute("account", acc);
                 session.setAttribute("customer", acc);
-                // Keep session.getAttribute("admin") intact so both run concurrently!
                 session.setAttribute("message", "Đăng nhập tài khoản Khách hàng (" + acc.getFullname() + ") thành công!");
                 response.sendRedirect(request.getContextPath() + "/home");
             }

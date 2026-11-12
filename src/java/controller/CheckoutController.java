@@ -142,6 +142,9 @@ public class CheckoutController extends HttpServlet {
             session.removeAttribute("cart");
             session.removeAttribute("appliedVoucherCode");
             session.removeAttribute("discountAmount");
+            if (acc != null) {
+                session.removeAttribute("cart_" + acc.getUsername());
+            }
             
             if ("admin".equals(acc.getRole())) {
                 session.setAttribute("message", "Đặt đơn hàng tại quầy thành công!");

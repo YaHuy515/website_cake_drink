@@ -63,9 +63,33 @@
             </div>
             
             <div class="form-group">
-                <label for="description" class="form-label">Mô tả sản phẩm</label>
-                <textarea name="description" id="description" class="form-input" rows="4" 
-                          placeholder="Mô tả chi tiết hương vị sản phẩm...">${product.description}</textarea>
+                <label for="servingSize" class="form-label">Quy cách / Khẩu phần</label>
+                <input type="text" name="servingSize" id="servingSize" class="form-input" 
+                       placeholder="Ví dụ: Ly 500ml (Size L) hoặc Hộp 4 chiếc (160g)" value="${product.servingSize}">
+            </div>
+            
+            <div class="form-group">
+                <label for="ingredients" class="form-label">Thành phần nguyên liệu</label>
+                <input type="text" name="ingredients" id="ingredients" class="form-input" 
+                       placeholder="Ví dụ: Bột mì hảo hạng, bơ lạt, sữa tươi, trứng gà..." value="${product.ingredients}">
+            </div>
+            
+            <div class="form-group">
+                <label for="instruction" class="form-label">Hướng dẫn sử dụng & bảo quản</label>
+                <input type="text" name="instruction" id="instruction" class="form-input" 
+                       placeholder="Ví dụ: Dùng lạnh trong 2 giờ, bảo quản ngăn mát 2-6°C..." value="${product.instruction}">
+            </div>
+            
+            <div class="form-group">
+                <label for="description" class="form-label">Mô tả ngắn gọn (hiển thị trên thẻ sản phẩm)</label>
+                <textarea name="description" id="description" class="form-input" rows="2" 
+                          placeholder="Mô tả tóm tắt hương vị sản phẩm...">${product.description}</textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="detailDescription" class="form-label">Mô tả chi tiết chuyên sâu (hiển thị tại trang Detail)</label>
+                <textarea name="detailDescription" id="detailDescription" class="form-input" rows="4" 
+                          placeholder="Mô tả kỹ lưỡng hương vị, câu chuyện xuất xứ, trải nghiệm thưởng thức...">${product.detailDescription}</textarea>
             </div>
             
             <div class="form-group" style="display: flex; align-items: center; gap: 10px; margin-top: 24px;">
